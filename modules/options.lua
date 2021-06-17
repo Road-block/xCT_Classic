@@ -2587,8 +2587,16 @@ addon.options.args["Frames"] = {
               get = get2,
               set = set2,
             },
-            showPartyKills = {
+            showReflects = {
               order = 3,
+              type = 'toggle',
+              name = L["Reflects"],
+              desc = L["Show the spell that you reflected."],
+              get = get2,
+              set = set2,
+            },
+            showPartyKills = {
+              order = 4,
               type = 'toggle',
               name = L["Unit Killed"],
               desc = L["Display unit that was killed by your final blow."],
@@ -2596,7 +2604,7 @@ addon.options.args["Frames"] = {
               set = set2,
             },
             showBuffs = {
-              order = 4,
+              order = 5,
               type = 'toggle',
               name = L["Buff Gains/Fades"],
               desc = L["Display the names of helpful auras |cff00FF00(Buffs)|r that you gain and lose."],
@@ -2604,7 +2612,7 @@ addon.options.args["Frames"] = {
               set = set2,
             },
             showDebuffs = {
-              order = 5,
+              order = 6,
               type = 'toggle',
               name = L["Debuff Gains/Fades"],
               desc = L["Display the names of harmful auras |cffFF0000(Debuffs)|r that you gain and lose."],
@@ -2612,7 +2620,7 @@ addon.options.args["Frames"] = {
               set = set2,
             },
             showLowManaHealth = {
-              order = 6,
+              order = 7,
               type = 'toggle',
               name = L["Low Mana/Health"],
               desc = L["Displays 'Low Health/Mana' when your health/mana reaches the low threshold."],
@@ -2620,7 +2628,7 @@ addon.options.args["Frames"] = {
               set = set2,
             },
             showCombatState = {
-              order = 7,
+              order = 8,
               type = 'toggle',
               name = L["Leave/Enter Combat"],
               desc = L["Displays when the player is leaving or entering combat."],
@@ -2628,7 +2636,7 @@ addon.options.args["Frames"] = {
               set = set2,
             },
             showRepChanges = {
-              order = 8,
+              order = 9,
               type = 'toggle',
               name = L["Show Reputation"],
               desc = L["Displays your player's reputation gains and losses."],
@@ -2636,7 +2644,7 @@ addon.options.args["Frames"] = {
               set = set2,
             },
             showHonorGains = {
-              order = 9,
+              order = 10,
               type = 'toggle',
               name = L["Show Honor"],
               desc = L["Displays your player's honor gains."],

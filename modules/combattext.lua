@@ -229,6 +229,7 @@ local function ShowLootIcons() return x.db.profile.frames["loot"].iconsEnabled e
 local function GetLootIconSize() return x.db.profile.frames["loot"].iconsSize end
 local function ShowInterrupts() return x.db.profile.frames["general"].showInterrupts end
 local function ShowDispells() return x.db.profile.frames["general"].showDispells end
+local function ShowReflects() return x.db.profile.frames["general"].showReflects end
 local function ShowPartyKill() return x.db.profile.frames["general"].showPartyKills end
 local function ShowBuffs() return x.db.profile.frames["general"].showBuffs end
 local function ShowDebuffs() return x.db.profile.frames["general"].showDebuffs end
@@ -403,6 +404,7 @@ local format_faction_add        = "%s +%s"
 local format_faction_sub        = "%s %s"
 local format_crit               = "%s%s%s"
 local format_dispell            = "%s: %s"
+local format_reflect            = "%s: %s"
 local format_quality            = "ITEM_QUALITY%s_DESC"
 local format_remove_realm       = "(.*)-.*"
 
@@ -504,15 +506,18 @@ local unsupportedLocales = { zhCN = true, koKR = true, zhTW = true }
 local XCT_STOLE
 local XCT_KILLED
 local XCT_DISPELLED
+local XCT_REFLECTED
 
 if unsupportedLocales[GetLocale()] then
   XCT_STOLE = ACTION_SPELL_STOLEN
   XCT_KILLED = ACTION_PARTY_KILL
   XCT_DISPELLED = ACTION_SPELL_DISPEL
+  XCT_REFLECTED = ACTION_SPELL_MISSED_REFLECT
 else
   XCT_STOLE = utf8.upper(utf8.sub(ACTION_SPELL_STOLEN, 1, 1))..utf8.sub(ACTION_SPELL_STOLEN, 2)
   XCT_KILLED = utf8.upper(utf8.sub(ACTION_PARTY_KILL, 1, 1))..utf8.sub(ACTION_PARTY_KILL, 2)
   XCT_DISPELLED = utf8.upper(utf8.sub(ACTION_SPELL_DISPEL, 1, 1))..utf8.sub(ACTION_SPELL_DISPEL, 2)
+  XCT_REFLECTED = utf8.upper(utf8.sub(ACTION_SPELL_MISSED_REFLECT, 1, 1))..utf8.sub(ACTION_SPELL_MISSED_REFLECT, 2)
 end
 
 --[=====================================================[
@@ -1757,18 +1762,27 @@ local CombatEventHandlers = {
 	end,
 
 	["IncomingMiss"] = function (args)
-		if not ShowMissTypes() then return end
-
+		if not (ShowMissTypes() or ShowReflects()) then return end
 		local message = _G["COMBAT_TEXT_"..args.missType]
-
+		if ShowMissTypes() then
 		-- Add Icons
 		message = x:GetSpellTextureFormatted(args.extraSpellId,
-		                                          message,
-		          x.db.profile.frames['damage'].iconsEnabled and x.db.profile.frames['damage'].iconsSize or -1,
-		          x.db.profile.frames['damage'].spacerIconsEnabled,
-		          x.db.profile.frames['damage'].fontJustify)
+                          message,
+                	  x.db.profile.frames['damage'].iconsEnabled and x.db.profile.frames['damage'].iconsSize or -1,
+			  x.db.profile.frames['damage'].spacerIconsEnabled,
+			  x.db.profile.frames['damage'].fontJustify)
 
 		x:AddMessage('damage', message, missTypeColorLookup[args.missType] or 'misstypesOut')
+		end
+		if args.missType == 'REFLECT' and ShowReflects() then
+			message = sformat(format_reflect, XCT_REFLECTED, args.spellName)
+			message = x:GetSpellTextureFormatted(args.spellId,
+				  message,
+				  x.db.profile.frames['general'].iconsEnabled and x.db.profile.frames['general'].iconsSize or -1,
+				  x.db.profile.frames['general'].spacerIconsEnabled,
+				  x.db.profile.frames['general'].fontJustify)
+			x:AddMessage('general', message, 'reflects')
+		end
 	end,
 
 	["SpellDispel"] = function (args)
