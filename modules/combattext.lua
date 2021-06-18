@@ -161,8 +161,11 @@ function x:UpdateCombatTextEvents(enable)
     f:RegisterEvent("CHAT_MSG_CURRENCY")
     f:RegisterEvent("CHAT_MSG_MONEY")
 
-    -- damage and healing
-    --f:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+    -- monster chat
+    f:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE")
+    f:RegisterEvent("CHAT_MSG_MONSTER_EMOTE") -- RGBToColorCode(r,g,b), RGBTableToColorCode(colorTab)
+    f:RegisterEvent("CHAT_MSG_MONSTER_YELL")
+    f:RegisterEvent("CHAT_MSG_MONSTER_SAY")
 
     -- Class combo points
     f:RegisterEvent("UNIT_AURA")
@@ -191,6 +194,7 @@ local function ShowFaction() return x.db.profile.frames.general.showRepChanges e
 local function ShowReactives() return x.db.profile.frames.procs.enabledFrame end
 local function ShowLowResources() return x.db.profile.frames.general.showLowManaHealth end
 local function ShowCombatState() return x.db.profile.frames.general.showCombatState end
+local function ShowMonsterChat() return x.db.profile.frames.general.showMonsterChat end
 local function ShowFriendlyNames() return x.db.profile.frames["healing"].showFriendlyHealers end
 local function ShowColoredFriendlyNames() return x.db.profile.frames["healing"].enableClassNames end
 local function ShowHealingRealmNames() return x.db.profile.frames["healing"].enableRealmNames end
@@ -427,6 +431,7 @@ local format_strcolor_white     = "ffffff"
 local format_currency_single    = (CURRENCY_GAINED:gsub("%%s", "(.+)"))                                 -- "You receive currency: (.+)."
 local format_currency_multiple  = (CURRENCY_GAINED_MULTIPLE:gsub("%%s", "(.+)"):gsub("%%d", "(%%d+)"))  -- "You receive currency: (.+) x(%d+)."
 local format_currency           = "%s: %s [%s] |cff798BDDx%s|r |cffFFFF00(%s)|r"
+local format_monster_chat       = "%s: %s %s"
 
 --[=====================================================[
  Message Formatters
@@ -1068,6 +1073,33 @@ x.events = {
       if msg:find("share") then o = o.."(split)" end
 
       x:AddMessage("loot", o, {1, 1, 0}) -- yellow
+    end,
+
+  ["CHAT_MSG_RAID_BOSS_EMOTE"] = function(msg, monster, _, _, player)
+      if not ShowMonsterChat() then return end
+      local color = {ChatTypeInfo.RAID_BOSS_EMOTE.r, ChatTypeInfo.RAID_BOSS_EMOTE.g, ChatTypeInfo.RAID_BOSS_EMOTE.b}
+      local message = sformat(msg,monster,player or "")
+      x:AddMessage("general", message, color)
+    end,
+  ["CHAT_MSG_MONSTER_EMOTE"] = function(msg, monster, _, _, player)
+      if not ShowMonsterChat() then return end
+      local color = {ChatTypeInfo.MONSTER_EMOTE.r, ChatTypeInfo.MONSTER_EMOTE.g, ChatTypeInfo.MONSTER_EMOTE.b}
+      local message = sformat(msg,monster,player or "")
+      x:AddMessage("general", message, color)
+    end,
+  ["CHAT_MSG_MONSTER_YELL"] = function(msg, monster, _, _, player)
+      if not ShowMonsterChat() then return end
+      local color = {ChatTypeInfo.MONSTER_YELL.r, ChatTypeInfo.MONSTER_YELL.g, ChatTypeInfo.MONSTER_YELL.b}
+      local message = sformat(msg,monster,player or "")
+      message = sformat(format_monster_chat, monster, message, player or "")
+      x:AddMessage("general", message, color)
+    end,
+    ["CHAT_MSG_MONSTER_SAY"] = function(msg, monster, _, _, player)
+      if not ShowMonsterChat() then return end
+      local color = {ChatTypeInfo.MONSTER_SAY.r, ChatTypeInfo.MONSTER_SAY.g, ChatTypeInfo.MONSTER_SAY.b}
+      local message = sformat(msg,monster,player or "")
+      message = sformat(format_monster_chat, monster, message, player or "")
+      x:AddMessage("general", message, color)
     end,
 
   ["SPELL_ACTIVATION_OVERLAY_GLOW_SHOW"] = function(spellID)

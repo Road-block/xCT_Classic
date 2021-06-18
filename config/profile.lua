@@ -262,6 +262,7 @@ addon.defaults = {
         ["showDispells"] = true,
         ["showReflects"] = true,
         ["showPartyKills"] = true,
+        ["showMonsterChat"] = true,
         ["showBuffs"] = true,
         ["showDebuffs"] = true,
         ["showLowManaHealth"] = true,
