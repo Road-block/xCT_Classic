@@ -164,8 +164,8 @@ function x:UpdateCombatTextEvents(enable)
     -- monster chat
     f:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE")
     f:RegisterEvent("CHAT_MSG_MONSTER_EMOTE") -- RGBToColorCode(r,g,b), RGBTableToColorCode(colorTab)
-    f:RegisterEvent("CHAT_MSG_MONSTER_YELL")
-    f:RegisterEvent("CHAT_MSG_MONSTER_SAY")
+    --f:RegisterEvent("CHAT_MSG_MONSTER_YELL")
+    --f:RegisterEvent("CHAT_MSG_MONSTER_SAY")
 
     -- Class combo points
     f:RegisterEvent("UNIT_AURA")
@@ -1078,12 +1078,14 @@ x.events = {
   ["CHAT_MSG_RAID_BOSS_EMOTE"] = function(msg, monster, _, _, player)
       if not ShowMonsterChat() then return end
       local color = {ChatTypeInfo.RAID_BOSS_EMOTE.r, ChatTypeInfo.RAID_BOSS_EMOTE.g, ChatTypeInfo.RAID_BOSS_EMOTE.b}
+      monster = NORMAL_FONT_COLOR:WrapTextInColorCode(monster)
       local message = sformat(msg,monster,player or "")
       x:AddMessage("general", message, color)
     end,
   ["CHAT_MSG_MONSTER_EMOTE"] = function(msg, monster, _, _, player)
       if not ShowMonsterChat() then return end
       local color = {ChatTypeInfo.MONSTER_EMOTE.r, ChatTypeInfo.MONSTER_EMOTE.g, ChatTypeInfo.MONSTER_EMOTE.b}
+      monster = VERY_LIGHT_GRAY_COLOR:WrapTextInColorCode(monster)
       local message = sformat(msg,monster,player or "")
       x:AddMessage("general", message, color)
     end,
@@ -1094,7 +1096,7 @@ x.events = {
       message = sformat(format_monster_chat, monster, message, player or "")
       x:AddMessage("general", message, color)
     end,
-    ["CHAT_MSG_MONSTER_SAY"] = function(msg, monster, _, _, player)
+  ["CHAT_MSG_MONSTER_SAY"] = function(msg, monster, _, _, player)
       if not ShowMonsterChat() then return end
       local color = {ChatTypeInfo.MONSTER_SAY.r, ChatTypeInfo.MONSTER_SAY.g, ChatTypeInfo.MONSTER_SAY.b}
       local message = sformat(msg,monster,player or "")
