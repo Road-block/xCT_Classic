@@ -87,6 +87,11 @@ x.POWER_LOOKUP = {
 	[16] = "ARCANE_CHARGES",
 	[17] = "FURY",
 	[18] = "PAIN",
+  [19] = "ESSENCE",
+  [20] = "RUNES", -- "RUNETYPE_BLOOD",
+  [21] = "RUNES", -- "RUNETYPE_FROST",
+  [22] = "RUNES", -- "RUNETYPE_UNHOLY",
+  [26] = "ECLIPSE",
 }
 
 
@@ -111,7 +116,11 @@ function x:UpdatePlayer()
   if x.player.unit == "custom" then
     --CombatTextSetActiveUnit(x.player.customUnit)
   else
+    if UnitHasVehicleUI("player") then
+      x.player.unit = "vehicle"
+    else
       x.player.unit = "player"
+    end
     CombatTextSetActiveUnit(x.player.unit)
   end
 
@@ -146,15 +155,15 @@ function x:UpdateCombatTextEvents(enable)
     f:RegisterEvent("UNIT_POWER_UPDATE")
     f:RegisterEvent("PLAYER_REGEN_DISABLED")
     f:RegisterEvent("PLAYER_REGEN_ENABLED")
-    --f:RegisterEvent("UNIT_ENTERED_VEHICLE")
-    --f:RegisterEvent("UNIT_EXITING_VEHICLE")
+    f:RegisterEvent("UNIT_ENTERED_VEHICLE")
+    f:RegisterEvent("UNIT_EXITING_VEHICLE")
     f:RegisterEvent("PLAYER_ENTERING_WORLD")
     f:RegisterEvent("UNIT_PET")
     f:RegisterEvent("PLAYER_TARGET_CHANGED")
     f:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
 
     -- if runes
-    --f:RegisterEvent("RUNE_POWER_UPDATE")
+    f:RegisterEvent("RUNE_POWER_UPDATE")
 
     -- if loot
     f:RegisterEvent("CHAT_MSG_LOOT")
@@ -191,6 +200,7 @@ local function ShowMissTypes() return x.db.profile.frames.damage.showDodgeParryM
 local function ShowResistances() return x.db.profile.frames.damage.showDamageReduction end
 local function ShowHonor() return x.db.profile.frames.damage.showHonorGains end
 local function ShowFaction() return x.db.profile.frames.general.showRepChanges end
+local function ShowLoyalty() return x.db.profile.frames.general.showLoyaltyChanges end
 local function ShowReactives() return x.db.profile.frames.procs.enabledFrame end
 local function ShowLowResources() return x.db.profile.frames.general.showLowManaHealth end
 local function ShowCombatState() return x.db.profile.frames.general.showCombatState end
@@ -306,9 +316,9 @@ local function TrackSpells() return x.db.profile.spellFilter.trackSpells end
 local function IsResourceDisabled( resource, amount )
 	if resource == "ECLIPSE" then
 		if amount > 0 then
-			return x.db.profile.frames["power"].disableResource_ECLIPSE_positive
+			return x.db.profile.frames["power"].disableResource_ECLIPSE_positive -- -lunar+solar
 		elseif amount < 0 then
-			return x.db.profile.frames["power"].disableResource_ECLIPSE_negative
+			return x.db.profile.frames["power"].disableResource_ECLIPSE_negative -- +lunar-solar
 		end
 	end
 	if x.db.profile.frames["power"]["disableResource_"..resource] ~= nil then
@@ -1036,6 +1046,7 @@ x.events = {
       end
 
       local currencyInfo = C_CurrencyInfo.GetCurrencyInfoFromLink(currencyLink)
+      if not currencyInfo then return end
       local name, amountOwned, texturePath = currencyInfo.name, currencyInfo.quantity, currencyInfo.iconFileID
 
       -- format curency
@@ -1752,6 +1763,22 @@ local CombatEventHandlers = {
 		x:AddMessage('general', sformat(format_dispell, XCT_KILLED, args.destName), color)
 	end,
 
+  ["PetLoyalty"] = function(args)
+    if not ShowPetLoyalty() then return end
+
+    local color, message
+    local loyalty = GetPetLoyalty and GetPetLoyalty() or ""
+    if args.amount == 1 then
+      color = 'loyaltyGain'
+      message = _G["PET_LOYALTY_GAIN"] .. " " .. loyalty
+    else
+      color = 'loyaltyLoss'
+      message = _G["PET_LOYALTY_LOSS"] .. " " .. loyalty
+    end
+
+    x:AddMessage('general', message, color)
+  end,
+
 	["InterruptedUnit"] = function (args)
 		if not ShowInterrupts() then return end
 
@@ -1863,7 +1890,9 @@ local CombatEventHandlers = {
 		if energy_type == "ECLIPSE" then
 			if amount > 0 then
 				color = x.LookupColorByName("color_ECLIPSE_positive")
+        energy_type = "BALANCE_POSITIVE_ENERGY"
 			elseif amount < 0 then
+        energy_type = "BALANCE_NEGATIVE_ENERGY"
 				color = x.LookupColorByName("color_ECLIPSE_negative")
 			end
 		else
@@ -1974,6 +2003,9 @@ function x.CombatLogEvent (args)
 		elseif args.event == 'PARTY_KILL' then
 			CombatEventHandlers.KilledUnit(args)
 
+    elseif args.event == 'UNIT_LOYALTY' then
+      CombatEventHandlers.PetLoyalty(args)
+
 		elseif args.event == 'SPELL_INTERRUPT' then
 			CombatEventHandlers.InterruptedUnit(args)
 
@@ -1985,6 +2017,9 @@ function x.CombatLogEvent (args)
 
 		elseif (args.suffix == "_AURA_APPLIED" or args.suffix == "_AURA_REFRESH") and AbsorbList[args.spellId] then
 			CombatEventHandlers.ShieldOutgoing(args)
+
+		elseif args.suffix == "_ENERGIZE" then
+			CombatEventHandlers.SpellEnergize(args)
 
 		end
 	end
@@ -2018,9 +2053,6 @@ function x.CombatLogEvent (args)
 
 		elseif (args.suffix == "_AURA_APPLIED" or args.suffix == "_AURA_REFRESH") and AbsorbList[args.spellId] then
 			CombatEventHandlers.ShieldIncoming(args)
-		elseif args.suffix == "_ENERGIZE" then
-			CombatEventHandlers.SpellEnergize(args)
-
 		end
 	end
 

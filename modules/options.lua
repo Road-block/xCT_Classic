@@ -751,18 +751,18 @@ addon.options.args["spells"] = {
         }]]
 
 
-        --["DEATHKNIGHT"] = { type = 'group', order = 1,  name = L["|cffC41F3BDeath Knight|r"] },
+        ["DEATHKNIGHT"] = { type = 'group', order = 1,  name = L["|cffC41F3BDeath Knight|r"] },
         --["DEMONHUNTER"] = { type = 'group', order = 2,  name = L["|cffA330C9Demon Hunter|r"] },
-        ["DRUID"]       = { type = 'group', order = 1,  name = L["|cffFF7D0ADruid|r"] },
-        ["HUNTER"]      = { type = 'group', order = 2,  name = L["|cffABD473Hunter|r"] },
-        ["MAGE"]        = { type = 'group', order = 3,  name = L["|cff69CCF0Mage|r"] },
+        ["DRUID"]       = { type = 'group', order = 2,  name = L["|cffFF7D0ADruid|r"] },
+        ["HUNTER"]      = { type = 'group', order = 3,  name = L["|cffABD473Hunter|r"] },
+        ["MAGE"]        = { type = 'group', order = 4,  name = L["|cff69CCF0Mage|r"] },
         --["MONK"]        = { type = 'group', order = 6,  name = L["|cff00FF96Monk|r"] },
-        ["PALADIN"]     = { type = 'group', order = 4,  name = L["|cffF58CBAPaladin|r"] },
-        ["PRIEST"]      = { type = 'group', order = 5,  name = L["|cffFFFFFFPriest|r"] },
-        ["ROGUE"]       = { type = 'group', order = 6,  name = L["|cffFFF569Rogue|r"] },
-        ["SHAMAN"]      = { type = 'group', order = 7, name = L["|cff0070DEShaman|r"] },
-        ["WARLOCK"]     = { type = 'group', order = 8, name = L["|cff9482C9Warlock|r"] },
-        ["WARRIOR"]     = { type = 'group', order = 9, name = L["|cffC79C6EWarrior|r"] },
+        ["PALADIN"]     = { type = 'group', order = 5,  name = L["|cffF58CBAPaladin|r"] },
+        ["PRIEST"]      = { type = 'group', order = 6,  name = L["|cffFFFFFFPriest|r"] },
+        ["ROGUE"]       = { type = 'group', order = 7,  name = L["|cffFFF569Rogue|r"] },
+        ["SHAMAN"]      = { type = 'group', order = 8, name = L["|cff0070DEShaman|r"] },
+        ["WARLOCK"]     = { type = 'group', order = 9, name = L["|cff9482C9Warlock|r"] },
+        ["WARRIOR"]     = { type = 'group', order = 10, name = L["|cffC79C6EWarrior|r"] },
 
       },
     },
@@ -2651,8 +2651,16 @@ addon.options.args["Frames"] = {
               get = get2,
               set = set2,
             },
-            showHonorGains = {
+            showLoyaltyChanges = {
               order = 11,
+              type = 'toggle',
+              name = L["Show Pet Loyalty"],
+              desc = L["Displays your pet's loyalty gains and losses."],
+              get = get2,
+              set = set2,
+            },
+            showHonorGains = {
+              order = 12,
               type = 'toggle',
               name = L["Show Honor"],
               desc = L["Displays your player's honor gains."],
@@ -6256,9 +6264,6 @@ addon.options.args["Frames"] = {
               width = "normal",
             },
 
-
-
-
             disableResource_CHI = {
               order = 108,
               type = 'toggle',
@@ -6316,7 +6321,22 @@ addon.options.args["Frames"] = {
               set = set2,
               width = "normal",
             },
-            
+            disableResource_ECLIPSE_positive = {
+              order = 115,
+              type = 'toggle',
+              name = L["Disable |cff798BDD"]..BALANCE_POSITIVE_ENERGY,
+              get = get2,
+              set = set2,
+              width = "normal",
+            },
+            disableResource_ECLIPSE_negative = {
+              order = 116,
+              type = 'toggle',
+              name = L["Disable |cff798BDD"]..BALANCE_NEGATIVE_ENERGY,
+              get = get2,
+              set = set2,
+              width = "normal",
+            },
 
           },
         },

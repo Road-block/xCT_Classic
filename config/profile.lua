@@ -225,6 +225,13 @@ addon.defaults = {
               ["reputationLoss"]     = { enabled = false, desc = L["Reputation Lost"],    default = { 1.00, 0.10, 0.10 } },
             },
           },
+          ["petloyalty"] = {
+            enabled = false, desc = L["Pet Loyalty"],
+            colors = {
+              ["loyaltyGain"]     = { enabled = false, desc = L["Loyalty Gained"],  default = { 0.10, 0.10, 1.00 } },
+              ["loyaltyLoss"]     = { enabled = false, desc = L["Loyalty Lost"],    default = { 1.00, 0.10, 0.10 } },
+            },
+          },
           ["combat"] = {
             enabled = false, desc = L["Combat Status"],
             colors = {
@@ -855,15 +862,17 @@ addon.defaults = {
           ['color_RUNES']  = { enabled = false, desc = RUNES,  default = { 0.50, 0.50, 0.50 } },
           ['color_ENERGY'] = { enabled = false, desc = ENERGY, default = { 1.00, 1.00, 0.00 } },
 
-          ['color_CHI_POWER']            = { enabled = false, desc = CHI_POWER,            default = { 0.71, 1.00, 0.92 } },
+          ['color_CHI']                  = { enabled = false, desc = CHI_POWER,            default = { 0.71, 1.00, 0.92 } },
           ['color_HOLY_POWER']           = { enabled = false, desc = HOLY_POWER,           default = { 0.95, 0.90, 0.60 } },
           ['color_RUNIC_POWER']          = { enabled = false, desc = RUNIC_POWER,          default = { 0.00, 0.82, 1.00 } },
           ['color_SOUL_SHARDS']          = { enabled = false, desc = SOUL_SHARDS,          default = { 0.50, 0.32, 0.55 } },
           ['color_LUNAR_POWER']          = { enabled = false, desc = LUNAR_POWER,          default = { 0.30, 0.52, 0.90 } },
           ['color_INSANITY_POWER']       = { enabled = false, desc = INSANITY_POWER,       default = { 0.40, 0.00, 0.80 } },
           ['color_MAELSTROM_POWER']      = { enabled = false, desc = MAELSTROM_POWER,      default = { 0.00, 0.50, 1.00 } },
-          ['color_ALTERNATE_POWER'] = { enabled = false, desc = ALTERNATE_POWER_TEXT, default = { 0.10, 0.10, 0.98 } },
+          ['color_ALTERNATE_POWER']      = { enabled = false, desc = ALTERNATE_POWER_TEXT, default = { 0.10, 0.10, 0.98 } },
           ['color_ARCANE_CHARGES_POWER'] = { enabled = false, desc = ARCANE_CHARGES_POWER, default = { 0.10, 0.10, 0.98 } },
+          ['color_ECLIPSE_positive']     = { enabled = false, desc = BALANCE_POSITIVE_ENERGY,default = { 0.61, 0.57, 0.17 } },
+          ['color_ECLIPSE_negative']     = { enabled = false, desc = BALANCE_NEGATIVE_ENERGY,default = { 0.17, 0.61, 0.57 } },
         },
 
         -- scrollable
@@ -894,7 +903,7 @@ addon.defaults = {
         ["disableResource_SOUL_SHARDS"]      = false,
         ["disableResource_LUNAR_POWER"]      = true,
 
-        ["disableResource_CHI_POWER"]        = true,
+        ["disableResource_CHI"]              = true,
         ["disableResource_HOLY_POWER"]       = false,
         ["disableResource_INSANITY_POWER"]   = false,
         ["disableResource_MAELSTROM_POWER"]  = true,
@@ -902,6 +911,8 @@ addon.defaults = {
         ["disableResource_ARCANE_CHARGES"]   = false,
         ["disableResource_FURY"]             = false,
         ["disableResource_PAIN"]             = false,
+        ["disableResource_ECLIPSE_positive"] = false,
+        ["disableResource_ECLIPSE_negative"] = false,
       },
 
       procs = {

@@ -21,6 +21,22 @@ local ADDON_NAME, addon = ...
 -- 'alias' takes the original spell id and a replacement spell id
 local spell, class, spec, alias = unpack(addon.merge_helpers)
 
+class 'DEATHKNIGHT'
+do
+	spec  '250' -- Blood
+	spell '48721'  '0.5'  -- Blood Boil
+	spell '50842'  '0.5'  -- Pestilence
+	spell '55078'  '3.5'  -- Blood Plague
+
+	spec  '251' -- Frost
+	spell '49184'  '0.5'  -- Howling Blast
+	spell '55095'  '3.5'  -- Frost Fever
+
+	spec  '252' -- Unholy
+	spell '50444'  '0.5'  -- Corpse Explosion
+	spell '47468'  '1.5'  -- Army of the Dead (Claw)
+	spell '52212'  '1.5'  -- Death and Decay
+end
 
 class 'DRUID'
 do
@@ -178,5 +194,5 @@ do
 
 	spec  '73' -- Protection
 	spell '6572'   '0.0'	--  Revenge
-	
+	spell '46968'  '0.5'    --  Shockwave
 end
