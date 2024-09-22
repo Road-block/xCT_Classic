@@ -36,45 +36,81 @@ end)
 local fsTitle, configButton
 x.UpdateBlizzardOptions = function() --[[ Nothing to see here, for now... ]] end
 
-InterfaceOptionsCombatPanel:HookScript('OnShow', function(self)
-  if not fsTitle then
-    -- Show Combat Options Title
-    fsTitle = self:CreateFontString(nil, "OVERLAY")
-    fsTitle:SetTextColor(1.00, 1.00, 1.00, 1.00)
-    fsTitle:SetFontObject(GameFontHighlightLeft)
-    fsTitle:SetText(L["|cff60A0FF(Now Controlled by |cffFFFF00xCT+|cff60A0FF)"])
-    fsTitle:SetPoint("LEFT", InterfaceOptionsCombatPanelEnableFloatingCombatText, "RIGHT", 0, -16)
-  end
+if InterfaceOptionsCombatPanel then
+  InterfaceOptionsCombatPanel:HookScript('OnShow', function(self)
+    if not fsTitle then
+      -- Show Combat Options Title
+      fsTitle = self:CreateFontString(nil, "OVERLAY")
+      fsTitle:SetTextColor(1.00, 1.00, 1.00, 1.00)
+      fsTitle:SetFontObject(GameFontHighlightLeft)
+      fsTitle:SetText(L["|cff60A0FF(Now Controlled by |cffFFFF00xCT+|cff60A0FF)"])
+      fsTitle:SetPoint("LEFT", InterfaceOptionsCombatPanelEnableFloatingCombatText, "RIGHT", 0, -16)
+    end
 
-  if not configButton then
-    -- Create a button to delete profiles
-    configButton = CreateFrame("Button", nil, self, "UIPanelButtonTemplate")
-    configButton:ClearAllPoints()
-    configButton:SetPoint("TOPLEFT", InterfaceOptionsCombatPanelEnableFloatingCombatText, "BOTTOMLEFT", 24, -16)
-    configButton:SetSize(160, 28)
-    configButton:SetText(L["Configure in xCT+"])
-    configButton:Show()
-    configButton:SetScript("OnClick", function(self)
-      InterfaceOptionsFrame_OnHide()
-      HideUIPanel(GameMenuFrame)
-      x:ShowConfigTool("FloatingCombatText")
-    end)
-  end
+    if not configButton then
+      -- Create a button to delete profiles
+      configButton = CreateFrame("Button", nil, self, "UIPanelButtonTemplate")
+      configButton:ClearAllPoints()
+      configButton:SetPoint("TOPLEFT", InterfaceOptionsCombatPanelEnableFloatingCombatText, "BOTTOMLEFT", 24, -16)
+      configButton:SetSize(160, 28)
+      configButton:SetText(L["Configure in xCT+"])
+      configButton:Show()
+      configButton:SetScript("OnClick", function(self)
+        InterfaceOptionsFrame_OnHide()
+        HideUIPanel(GameMenuFrame)
+        x:ShowConfigTool("FloatingCombatText")
+      end)
+    end
 
-  if not InterfaceOptionsCombatPanel.xCTEnabled then
-    local oldText = InterfaceOptionsCombatPanelEnableFloatingCombatTextText:GetText()
-    InterfaceOptionsCombatPanelEnableFloatingCombatText:Disable()
-    InterfaceOptionsCombatPanel.xCTEnabled = true
+    if not InterfaceOptionsCombatPanel.xCTEnabled then
+      local oldText = InterfaceOptionsCombatPanelEnableFloatingCombatTextText:GetText()
+      InterfaceOptionsCombatPanelEnableFloatingCombatText:Disable()
+      InterfaceOptionsCombatPanel.xCTEnabled = true
 
-    -- -- InterfaceOptionsCombatPanelSpellAlertOpacitySlider:ClearAllPoints()
-    -- -- InterfaceOptionsCombatPanelSpellAlertOpacitySlider:SetPoint("TOPLEFT", configButton, "BOTTOMLEFT", 24, -32)
-	InterfaceOptionsCombatPanelCombatTextFloatModeDropDown:ClearAllPoints()
-	InterfaceOptionsCombatPanelCombatTextFloatModeDropDown:SetPoint("TOPLEFT", configButton, "BOTTOMLEFT", 0, -20)
-	-- InterfaceOptionsCombatPanelEnableCombatDamageText:Disable()
-	-- InterfaceOptionsCombatPanelEnableCombatDamageText:ClearAllPoints()
-	-- InterfaceOptionsCombatPanelEnableCombatDamageText:SetPoint("TOPLEFT", configButton, "BOTTOMLEFT", 224, -32)
-  end
-end)
+      -- -- InterfaceOptionsCombatPanelSpellAlertOpacitySlider:ClearAllPoints()
+      -- -- InterfaceOptionsCombatPanelSpellAlertOpacitySlider:SetPoint("TOPLEFT", configButton, "BOTTOMLEFT", 24, -32)
+  	InterfaceOptionsCombatPanelCombatTextFloatModeDropDown:ClearAllPoints()
+  	InterfaceOptionsCombatPanelCombatTextFloatModeDropDown:SetPoint("TOPLEFT", configButton, "BOTTOMLEFT", 0, -20)
+  	-- InterfaceOptionsCombatPanelEnableCombatDamageText:Disable()
+  	-- InterfaceOptionsCombatPanelEnableCombatDamageText:ClearAllPoints()
+  	-- InterfaceOptionsCombatPanelEnableCombatDamageText:SetPoint("TOPLEFT", configButton, "BOTTOMLEFT", 224, -32)
+    end
+  end)
+elseif SettingsPanel and (EventRegistry and EventRegistry.RegisterCallback) then
+  EventRegistry:RegisterCallback("Settings.CategoryChanged",function(ownerID, ...)
+    local category = ...
+    if category:GetName() == _G.COMBAT then
+      local defaultsBtn = SettingsPanel.Container.SettingsList.Header.DefaultsButton
+      local frmStrata,frmLevel
+      if defaultsBtn then
+        frmStrata = defaultsBtn:GetFrameStrata()
+        frmLevel = defaultsBtn:GetFrameLevel()
+      else
+        return
+      end
+      if not configButton then
+        -- Create a button to delete profiles
+        configButton = CreateFrame("Button", "xCT_Plus_Blizzard_Button", SettingsPanel, "UIPanelButtonTemplate")
+        configButton:ClearAllPoints()
+        configButton:SetPoint("RIGHT", defaultsBtn, "LEFT", -20, 0)
+        configButton:SetSize(150, 24)
+        configButton:SetText(L["Configure in xCT+"])
+        configButton:SetScript("OnClick", function(self)
+          HideUIPanel(SettingsPanel)
+          HideUIPanel(GameMenuFrame)
+          x:ShowConfigTool("FloatingCombatText")
+        end)
+      end
+      configButton:SetFrameStrata(frmStrata)
+      configButton:SetFrameLevel(frmLevel + 1)
+      configButton:Show()
+    else
+      if configButton then
+        configButton:Hide()
+      end
+    end
+  end)
+end
 
 function x:UpdateBlizzardFCT()
   if self.db.profile.blizzardFCT.enabled then
@@ -105,7 +141,15 @@ x.blizzardOptions = {
       order = 1,
       type = 'execute',
       name = L["Show Config"],
-      func = function() InterfaceOptionsFrame_OnHide(); HideUIPanel(GameMenuFrame); x:ShowConfigTool() end,
+      func = function()
+        if _G.InterfaceOptionsFrame_OnHide then
+          InterfaceOptionsFrame_OnHide();
+        elseif SettingsPanel.Close then
+          HideUIPanel(SettingsPanel);
+        end
+        HideUIPanel(GameMenuFrame);
+        x:ShowConfigTool();
+      end,
     },
   },
 }

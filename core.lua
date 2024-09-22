@@ -362,7 +362,7 @@ end
 local getSpellDescription
 do
   local Descriptions, description = { }, nil
-  local tooltip = CreateFrame('GameTooltip')
+  local tooltip = CreateFrame('GameTooltip', "xCTPlusScanningTooltip", nil)
   tooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 
   -- Add FontStrings to the tooltip
@@ -410,6 +410,11 @@ local function SpamSpellSet(info, value)
 end
 
 local CLASS_NAMES = {
+  ["DEATHKNIGHT"] = {
+    [250] = 1,   -- Blood
+    [251] = 2,   -- Frost
+    [252] = 3,   -- Unholy
+  },
   ["DRUID"] = {
     [102] = 1,   -- Balance
     [103] = 2,   -- Feral
@@ -470,6 +475,9 @@ x.specName = {
    	[102] = L["Balance"],
    	[103] = L["Feral"],
    	[105] = L["Restoration"],
+    [250] = L["Blood"],
+    [251] = L["Frost"],
+    [252] = L["Unholy"],
    	[253] = L["Beast Mastery"],
    	[254] = L["Marksmanship"],
    	[255] = L["Survival"],
@@ -1870,7 +1878,11 @@ function x:ShowConfigTool(...)
   x.myContainer:SetCallback("OnClose", myContainer_OnRelease)
 
   -- Last minute settings and SHOW
-  x.myContainer.content:GetParent():SetMinResize(803, 300)
+  if x.myContainer.content:GetParent().SetMinResize then
+    x.myContainer.content:GetParent():SetMinResize(803, 300)
+  else
+    x.myContainer.content:GetParent():SetResizeBounds(803, 300)
+  end
 
   -- Go through and select all the groups that are relevant to the player
   if not x.selectDefaultGroups then
