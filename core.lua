@@ -265,6 +265,7 @@ end
 -- This function was created as the central location for crappy code
 function x:CompatibilityLogic( existing )
     local addonVersionString = GetAddOnMetadata("xCT+", "Version")
+    if addonVersionString and string_find(addonVersionString, "project%-version") then addonVersionString = "4.7.1" end
     local currentVersion = VersionToTable(addonVersionString)
     local previousVersion = VersionToTable(self.db.profile.dbVersion or "4.3.0 Beta 2")
 
@@ -329,7 +330,7 @@ function x:CompatibilityLogic( existing )
         for name, settings in pairs(x.db.profile.frames) do
           if settings.colors then
             for exists in pairs(settings.colors) do
-              if not addon.defaults.profile.frames[name].colors[exists] then
+              if addon.defaults.profile.frames[name] and not addon.defaults.profile.frames[name].colors[exists] then
                 settings.colors[exists] = nil
               end
             end
@@ -362,7 +363,7 @@ end
 local getSpellDescription
 do
   local Descriptions, description = { }, nil
-  local tooltip = CreateFrame('GameTooltip', "xCTPlusScanningTooltip", nil)
+  local tooltip = CreateFrame('GameTooltip', "xCTPlusScanningTooltip", nil, 'GameTooltipTemplate')
   tooltip:SetOwner(WorldFrame, "ANCHOR_NONE")
 
   -- Add FontStrings to the tooltip
@@ -540,6 +541,11 @@ function x:UpdateSpamSpells()
   local global = addon.options.args.spells.args.globalList.args
   local racetab = addon.options.args.spells.args.raceList.args
   
+  local ignored = {
+    ["title"] = true,
+    ["mergeListDesc"] = true,
+  }
+
   -- Clear out the old spells
   for class, specs in pairs(CLASS_NAMES) do
     spells[class].args = {}
@@ -558,7 +564,9 @@ function x:UpdateSpamSpells()
 
   -- Clear out the old spells (global)
   for index in pairs(global) do
-    global[index] = nil
+    if not ignored[index] then
+      global[index] = nil
+    end
   end
 
   -- Create a list of the categories (to be sorted)
@@ -594,7 +602,9 @@ function x:UpdateSpamSpells()
 -- Clear out the old spells (racetab)
 -- Dirty add have to reform when better understanding the code
   for index in pairs(racetab) do
-    racetab[index] = nil
+    if not ignored[index] then
+      racetab[index] = nil
+    end
   end
 
   -- Create a list of the categories (to be sorted)
@@ -1459,7 +1469,7 @@ end
 
 local function GenerateColorOptionsTable_Entry(colorName, settings, options, index)
   -- Clean the DB of any old/removed values
-  if not settings.desc then return end
+  if not settings.desc or type(settings.desc) ~= "string" then return end
 
   -- Check for nil colors and set them to the default
   if not settings.color or not unpack(settings.color) then
@@ -1878,10 +1888,13 @@ function x:ShowConfigTool(...)
   x.myContainer:SetCallback("OnClose", myContainer_OnRelease)
 
   -- Last minute settings and SHOW
-  if x.myContainer.content:GetParent().SetMinResize then
-    x.myContainer.content:GetParent():SetMinResize(803, 300)
-  else
-    x.myContainer.content:GetParent():SetResizeBounds(803, 300)
+  local myContainerParent = x.myContainer.content:GetParent()
+  if myContainerParent then
+    if myContainerParent.SetResizeBounds then
+	    myContainerParent:SetResizeBounds(803, 300)
+    elseif myContainerParent.SetMinResize then
+	    myContainerParent:SetMinResize(803, 300)
+    end
   end
 
   -- Go through and select all the groups that are relevant to the player

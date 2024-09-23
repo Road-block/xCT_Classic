@@ -789,14 +789,14 @@ addon.options.args["spells"] = {
     },
 	
     raceList = {
-      name = "Racial Spells",
+      name = L["Racial Spells"],
       type = 'group',
       order = 23,
       args = {
         title = {
           type = 'description',
           order = 0,
-          name = "List of Mergeable Spells |cff798BDD(See Category)|r",
+          name = L["List of Mergeable Spells |cff798BDD(See Category)|r"],
           fontSize = "large",
           width = "double",
         },
@@ -804,7 +804,7 @@ addon.options.args["spells"] = {
           type = "description",
           order = 1,
           fontSize = "small",
-          name = "Uncheck an item if you do not want it merged. Contact me to add new items. See |cffFFFF00Credits|r for contact info.\n\n",
+          name = L["Uncheck an item if you do not want it merged. Contact me to add new items. See |cffFFFF00Credits|r for contact info.\n\n"],
         },
       },
     },
@@ -3469,8 +3469,16 @@ addon.options.args["Frames"] = {
               get = get2,
               set = set2,
             },
-            enablePartialMisses = {
+            enableAbsorbs = {
               order = 53,
+              type = 'toggle',
+              name = L["Show Absorbs"],
+              desc = L["Display 'Absorb' when your target absorbs all damage."],
+              get = get2,
+              set = set2,
+            },
+            enablePartialMisses = {
+              order = 54,
               type = 'toggle',
               name = L["Show Miss Types (Partials)"],
               desc = L["Show when your target takes only a percentage of your damage because it was partially absorbed, resisted, or blocked.\n\n|cffFF0000PLEASE NOTE:|r Only works if the spell is not merged. Turn off the Spell Merger to see all spells."],
@@ -3478,7 +3486,7 @@ addon.options.args["Frames"] = {
               set = set2,
             },
             showHighestPartialMiss = {
-              order = 54,
+              order = 55,
               type = 'toggle',
               name = L["Show the Highest Partial Miss"],
               desc = L["Only show the highest partial miss, instead of all the misses. (Rare, but less spammy)\n\n|cffFF0000PLEASE NOTE:|r Only works if the spell is not merged. Turn off the Spell Merger to see all spells."],

@@ -33,6 +33,14 @@ local utf8 = {
 local xCP = LibStub and LibStub("xCombatParser-1.0", true)
 if not xCP then print("Something went wrong when xCT+ tried to load. Please reinstall and inform the author.") end
 
+local L_AUTOATTACK = GetSpellInfo(6603)
+local L_KILLCOMMAND =  GetSpellInfo(34026)
+local KILLCOMMAND_ID = 83381
+
+local replacedTextures = {
+	[136998] = "Interface\\PVPFrame\\PVP-Currency-Alliance",
+	[137000] = "Interface\\PVPFrame\\PVP-Currency-Horde",
+}
 
 --[=====================================================[
  Holds cached spells, buffs, and debuffs
@@ -155,8 +163,12 @@ function x:UpdateCombatTextEvents(enable)
     f:RegisterEvent("UNIT_POWER_UPDATE")
     f:RegisterEvent("PLAYER_REGEN_DISABLED")
     f:RegisterEvent("PLAYER_REGEN_ENABLED")
-    f:RegisterEvent("UNIT_ENTERED_VEHICLE")
-    f:RegisterEvent("UNIT_EXITING_VEHICLE")
+    if C_EventUtils.IsEventValid("UNIT_ENTERED_VEHICLE") then
+      f:RegisterEvent("UNIT_ENTERED_VEHICLE")
+    end
+    if C_EventUtils.IsEventValid("UNIT_EXITING_VEHICLE") then
+      f:RegisterEvent("UNIT_EXITING_VEHICLE")
+    end
     f:RegisterEvent("PLAYER_ENTERING_WORLD")
     f:RegisterEvent("UNIT_PET")
     f:RegisterEvent("PLAYER_TARGET_CHANGED")
@@ -178,7 +190,9 @@ function x:UpdateCombatTextEvents(enable)
 
     -- Class combo points
     f:RegisterEvent("UNIT_AURA")
-    --f:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+    if C_EventUtils.IsEventValid("ACTIVE_TALENT_GROUP_CHANGED") then
+      f:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+    end
     --f:RegisterEvent("UNIT_COMBO_POINTS")
     f:RegisterEvent("PLAYER_TARGET_CHANGED")
 
@@ -227,6 +241,7 @@ local function ShowDots() return x.db.profile.frames["outgoing"].enableDotDmg en
 local function ShowHots() return x.db.profile.frames["outgoing"].enableHots end
 local function ShowImmunes() return x.db.profile.frames["outgoing"].enableImmunes end -- outgoing immunes
 local function ShowMisses() return x.db.profile.frames["outgoing"].enableMisses end -- outgoing misses
+local function ShowAbsorbs() return x.db.profile.frames["outgoing"].enableAbsorbs end -- outgoing absorbs
 local function ShowPartialMisses() return x.db.profile.frames["outgoing"].enablePartialMisses end
 local function ShowPetCrits() return x.db.profile.frames["critical"].petCrits end
 local function ShowLootItems() return x.db.profile.frames["loot"].showItems end
@@ -882,6 +897,7 @@ x.events = {
       end
     end,
   ["RUNE_POWER_UPDATE"] = function(slot)
+      if IsResourceDisabled("RUNES") then return end
       if GetRuneCooldown(slot) ~= 0 then return end
       local message = sformat(format_gain_rune, x.runeIcons[4], COMBAT_TEXT_RUNE_DEATH, x.runeIcons[4])
       x:AddSpamMessage("power", RUNES, message, x.runecolors[4], 1)
@@ -1048,6 +1064,7 @@ x.events = {
       local currencyInfo = C_CurrencyInfo.GetCurrencyInfoFromLink(currencyLink)
       if not currencyInfo then return end
       local name, amountOwned, texturePath = currencyInfo.name, currencyInfo.quantity, currencyInfo.iconFileID
+      texturePath = replacedTextures[texturePath] or texturePath
 
       -- format curency
       -- "%s: %s [%s] |cff798BDDx%s|r |cffFFFF00(%s)|r"
@@ -1234,7 +1251,9 @@ formatNameTypes = {
 -- Check to see if the name needs for be formated, if so, handle all the logistics
 function x.formatName(args, settings, isSource)
 	-- Event Type helper
-	local eventType = settings[isSource and args:GetSourceController() or args:GetDestinationController()]
+	local index = isSource and (args.fake_sourceController or args:GetSourceController())
+													or (args.fake_destinationController or args:GetDestinationController())
+	local eventType = settings[index]
 
 	-- If we have a valid event type that we can handle
 	if eventType and eventType.nameType > 0 then
@@ -1352,6 +1371,7 @@ local CombatEventHandlers = {
 	end,
 
 	["HealingOutgoing"] = function (args)
+		local spellName, spellSchool = args.spellName, args.spellSchool
 		local spellID, isHoT, amount, overhealing, merged = args.spellId, args.prefix == "SPELL_PERIODIC", args.amount, args.overhealing
 
 		-- Keep track of spells that go by
@@ -1390,20 +1410,21 @@ local CombatEventHandlers = {
 		if isHoT then outputColor = "healingOutPeriodic"end
 
 		-- Condensed Critical Merge
+		spellID = addon.mergesNameToID[spellName] or spellID
 		if IsMerged(spellID) then
 			merged = true
 			if critical then
 				if MergeCriticalsByThemselves() then
-					x:AddSpamMessage(outputFrame, spellID, amount, outputColor)
+					x:AddSpamMessage(outputFrame, spellID, amount, outputColor, nil, nil, "spellName", spellName, "spellSchool", spellSchool, "destinationController", args:GetDestinationController())
 					return
 				elseif MergeCriticalsWithOutgoing() then
-					x:AddSpamMessage("outgoing", spellID, amount, outputColor)
+					x:AddSpamMessage("outgoing", spellID, amount, outputColor, nil, nil, "spellName", spellName, "spellSchool", spellSchool, "destinationController", args:GetDestinationController())
 				elseif MergeHideMergedCriticals() then
-					x:AddSpamMessage("outgoing", spellID, amount, outputColor)
+					x:AddSpamMessage("outgoing", spellID, amount, outputColor, nil, nil, "spellName", spellName, "spellSchool", spellSchool, "destinationController", args:GetDestinationController())
 					return
 				end
 			else
-				x:AddSpamMessage(outputFrame, spellID, amount, outputColor)
+				x:AddSpamMessage(outputFrame, spellID, amount, outputColor, nil, nil, "spellName", spellName, "spellSchool", spellSchool, "destinationController", args:GetDestinationController())
 				return
 			end
 		end
@@ -1420,7 +1441,8 @@ local CombatEventHandlers = {
 	end,
 
 	["DamageOutgoing"] = function (args)
-		local message
+		local message, settings
+		local spellName, spellSchool = args.spellName, args.spellSchool
 		local critical, spellID, amount, merged = args.critical, args.spellId, args.amount
 		local isEnvironmental, isSwing, isAutoShot, isDoT = args.prefix == "ENVIRONMENTAL", args.prefix == "SWING", spellID == 75, args.prefix == "SPELL_PERIODIC"
 		local outputFrame, outputColorType = "outgoing"
@@ -1442,12 +1464,11 @@ local CombatEventHandlers = {
 		if IsSpellFiltered(spellID) or FilterOutgoingDamage(amount) then return end
 
 		-- Check to see if my pet is doing things
-		if args:IsSourceMyPet() and (not ShowKillCommand() or spellID ~= 34026) then
-			if not ShowPetDamage() then return end
+		if args:IsSourceMyPet() then
 			if isSwing and not ShowPetAutoAttack_Outgoing() then return end
 			if MergePetAttacks() then
 				local icon = x.GetPetTexture() or ""
-				x:AddSpamMessage(outputFrame, icon, amount, x.db.profile.spells.mergePetColor, 6)
+				x:AddSpamMessage(outputFrame, icon, amount, x.db.profile.spells.mergePetColor, 6, nil, "auto", spellID == KILLCOMMAND_ID and L_KILLCOMMAND or L_AUTOATTACK, "destinationController", args:GetDestinationController())
 				return
 			end
 			if not ShowPetCrits() then
@@ -1483,38 +1504,40 @@ local CombatEventHandlers = {
 			outputColorType = critical and 'meleeCrit' or 'melee'
 		end
 
-		local outputColor = x.GetSpellSchoolColor(args.spellSchool, outputColorType)
+		local outputColor = x.GetSpellSchoolColor(spellSchool, outputColorType)
 
+		spellID = addon.mergesNameToID[spellName] or spellID
 		if (isSwing or isAutoShot) and MergeMeleeSwings() then
 			merged = true
 			if outputFrame == "critical" then
 				if MergeCriticalsByThemselves() then
-					x:AddSpamMessage(outputFrame, spellID, amount, outputColor, 6)
+					x:AddSpamMessage(outputFrame, spellID, amount, outputColor, 6, nil, "auto", L_AUTOATTACK, "destinationController", args:GetDestinationController())
 					return
 				elseif MergeCriticalsWithOutgoing() then
-					x:AddSpamMessage("outgoing", spellID, amount, outputColor, 6)
+					x:AddSpamMessage("outgoing", spellID, amount, outputColor, 6, nil, "auto", L_AUTOATTACK, "destinationController", args:GetDestinationController())
 				elseif MergeHideMergedCriticals() then
-					x:AddSpamMessage("outgoing", spellID, amount, outputColor, 6)
+					x:AddSpamMessage("outgoing", spellID, amount, outputColor, 6, nil, "auto", L_AUTOATTACK, "destinationController", args:GetDestinationController())
 					return
 				end
 			else
-				x:AddSpamMessage(outputFrame, spellID, amount, outputColor, 6)
+				x:AddSpamMessage(outputFrame, spellID, amount, outputColor, 6, nil, "auto", L_AUTOATTACK, "destinationController", args:GetDestinationController())
 				return
 			end
 		elseif not isSwing and not isAutoShot and IsMerged(spellID) then
 			merged = true
 			if critical then
 				if MergeCriticalsByThemselves() then
-					x:AddSpamMessage(outputFrame, spellID, amount, outputColor)
+					x:AddSpamMessage(outputFrame, spellID, amount, outputColor, nil, nil, "spellName", spellName, "spellSchool", spellSchool, "destinationController", args:GetDestinationController())
 					return
 				elseif MergeCriticalsWithOutgoing() then
-					x:AddSpamMessage("outgoing", spellID, amount, outputColor)
+					x:AddSpamMessage("outgoing", spellID, amount, outputColor, nil, nil, "spellName", spellName, "spellSchool", spellSchool, "destinationController", args:GetDestinationController())
 				elseif MergeHideMergedCriticals() then
-					x:AddSpamMessage("outgoing", spellID, amount, outputColor)
+					x:AddSpamMessage("outgoing", spellID, amount, outputColor, nil, nil, "spellName", spellName, "spellSchool", spellSchool, "destinationController", args:GetDestinationController())
 					return
 				end
 			else
-				x:AddSpamMessage(outputFrame, spellID, amount, outputColor)
+				-- args:GetSourceController() / args:GetDestinationController()
+				x:AddSpamMessage(outputFrame, spellID, amount, outputColor, nil, nil, "spellName", spellName, "spellSchool", spellSchool, "destinationController", args:GetDestinationController())
 				return
 			end
 		end
@@ -1558,6 +1581,7 @@ local CombatEventHandlers = {
 	["DamageIncoming"] = function (args)
 		local message
 		local settings = x.db.profile.frames["damage"]
+		local spellName, spellSchool = args.spellName, args.spellSchool
 
 		-- Keep track of spells that go by
 		if args.spellId and TrackSpells() then x.spellCache.damage[args.spellId] = true end
@@ -1696,10 +1720,10 @@ local CombatEventHandlers = {
 		end
 
 		-- format_gain = "+%s"
-		local healer_name, message = args.sourceName, sformat(format_gain, x:Abbreviate(amount,"healing"))
+		local message = sformat(format_gain, x:Abbreviate(amount,"healing"))
 
 		if MergeIncomingHealing() then
-			x:AddSpamMessage("healing", x.formatName(args, settings.names, true), amount, "healingTaken", 5)
+			x:AddSpamMessage("healing", args.sourceName or "Unknown Source Name", amount, "healingTaken", 5, nil, "sourceGUID", args.sourceGUID, "sourceController", args:GetSourceController())
 		else
 			-- Add names
 			message = message .. x.formatName(args, settings.names, true)
@@ -1723,11 +1747,13 @@ local CombatEventHandlers = {
 		-- Track the aura
 		if TrackSpells() then x.spellCache[isBuff and 'buffs' or 'debuffs'][args.spellName]=true end
 
-		-- Check to see if we are filtering this spell's name
-		if IsBuffFiltered(args.spellName) then return end
-
-		-- See if we are showing that type of aura
-		if (isBuff and not ShowBuffs()) or (not isBuff and not ShowDebuffs()) then return end
+		if isBuff then
+			-- Stop if we're not showing buffs _or_ the spell's name is filtered
+			if not ShowBuffs() or IsBuffFiltered(args.spellName) then return end
+		else -- Aura is debuff
+			-- Stop if we're not showing debuffs _or_ the spell's name is filtered
+			if not ShowDebuffs() or IsDebuffFiltered(args.spellName) then return end
+		end
 
 		-- Begin constructing the event message and color
 		local color, message
@@ -1809,8 +1835,12 @@ local CombatEventHandlers = {
 		end
 
 		-- Check for filtered immunes
+		if args.missType == "ABSORB" and not ShowAbsorbs() then return end
 		if args.missType == "IMMUNE" and not ShowImmunes() then return end
 		if args.missType ~= "IMMUNE" and not ShowMisses() then return end
+
+		-- Check if spell is filtered
+		if IsSpellFiltered(spellId) then return end
 
 		-- Add Icons
 		message = x:GetSpellTextureFormatted(spellId,
@@ -1989,6 +2019,10 @@ local AbsorbList = {
 }
 
 function x.CombatLogEvent (args)
+	if args:IsSourceMyPet() and args.spellId == KILLCOMMAND_ID and ShowKillCommand() then
+		args.isPlayer = true
+	end
+
 	-- Is the source someone we care about?
 	if args.isPlayer or args:IsSourceMyVehicle() or ShowPetDamage() and args:IsSourceMyPet() then
 		if args.suffix == "_HEAL" then
