@@ -1,8 +1,8 @@
-## Interface: 40401, 11504
+## Interface: 50500,40402,11507
 ## Title: xCT+
 ## Notes: An Add-On that can out-perform or enhance the default Floating Combat Text!
 ## Author: Dandruff-Stormreaver US
-## Version: 4.7.1
+## Version: 4.7.2
 ## RequiredDeps: Blizzard_CombatText
 ## OptionalDeps: xCT, ElvUI
 ## SavedVariables: xCTSavedDB
