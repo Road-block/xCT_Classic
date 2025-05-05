@@ -22,6 +22,13 @@ local L = addon.L
 local sgsub, ipairs, pairs, type, string_format, table_insert, table_remove, table_sort, print, tostring, tonumber, select, string_lower, collectgarbage, string_match, string_find =
   string.gsub, ipairs, pairs, type, string.format, table.insert, table.remove, table.sort, print, tostring, tonumber, select, string.lower, collectgarbage, string.match, string.find
 local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
+local GetItemInfo = function(...)
+  if _G.GetItemInfo then
+    return _G.GetItemInfo(...)
+  elseif C_Item and C_Item.GetItemInfo then
+    return C_Item.GetItemInfo(...)
+  end
+end
 
 -- compares a tables values
 local function tableCompare(t1, t2)

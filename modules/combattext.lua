@@ -20,6 +20,34 @@ local x = addon.engine
 -- up values
 local _, _G, sformat, mfloor, mabs, ssub, smatch, sgsub, s_upper, s_lower, string, tinsert, tremove, ipairs, pairs, print, tostring, tonumber, select, unpack =
   nil, _G, string.format, math.floor, math.abs, string.sub, string.match, string.gsub, string.upper, string.lower, string, table.insert, table.remove, ipairs, pairs, print, tostring, tonumber, select, unpack
+local GetItemInfo = function(...)
+  if _G.GetItemInfo then
+    return _G.GetItemInfo(...)
+  elseif C_Item and C_Item.GetItemInfo then
+    return C_Item.GetItemInfo(...)
+  end
+end
+local GetItemQualityColor = function(...)
+  if _G.GetItemQualityColor then
+    return _G.GetItemQualityColor(...)
+  elseif C_Item and C_Item.GetItemQualityColor then
+    return C_Item.GetItemQualityColor(...)
+  end
+end
+local GetCoinTextureString = function(...)
+   if _G.GetCoinTextureString then
+      return _G.GetCoinTextureString(...)
+   elseif C_CurrencyInfo and C_CurrencyInfo.GetCoinTextureString then
+      return C_CurrencyInfo.GetCoinTextureString(...)
+   end
+end
+local GetItemCount = function(...)
+  if _G.GetItemCount then
+    return _G.GetItemCount(...)
+  elseif C_Item and C_Item.GetItemCount then
+    return C_Item.GetItemCount(...)
+  end
+end
 
 --UTF8 Functions
 local utf8 = {

@@ -22,7 +22,20 @@ local LSM = LibStub("LibSharedMedia-3.0");
 -- Setup up values
 local ssub, sformat, sgsub, pairs, tonumber, tostring, math, unpack, print, type, mfloor, random, table_insert, format, _G, select
 	= string.sub, string.format, string.gsub, pairs, tonumber, tostring, math, unpack, print, type, math.floor, math.random, table.insert, string.format, _G, select
-
+local GetCoinTextureString = function(...)
+   if _G.GetCoinTextureString then
+      return _G.GetCoinTextureString(...)
+   elseif C_CurrencyInfo and C_CurrencyInfo.GetCoinTextureString then
+      return C_CurrencyInfo.GetCoinTextureString(...)
+   end
+end
+local GetItemInfo = function(...)
+	if _G.GetItemInfo then
+		return _G.GetItemInfo(...)
+	elseif C_Item and C_Item.GetItemInfo then
+		return C_Item.GetItemInfo(...)
+	end
+end
 -- Start the Random Machine!
 random(time()); random(); random(time())
 

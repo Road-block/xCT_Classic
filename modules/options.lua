@@ -21,6 +21,13 @@ local x, noop = addon.engine, addon.noop
 local blankTable, unpack, select = {}, unpack, select
 local string_gsub, string_match, sformat, pairs = string.gsub, string.match, string.format, pairs
 local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata
+local GetItemInfo = function(...)
+  if _G.GetItemInfo then
+    return _G.GetItemInfo(...)
+  elseif C_Item and C_Item.GetItemInfo then
+    return C_Item.GetItemInfo(...)
+  end
+end
 
 -- New Icon "!"
 local NEW = x.new
