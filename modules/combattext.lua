@@ -977,7 +977,7 @@ x.events = {
       -- Fixing Loot for Legion
       local preMessage, linkColor, itemString, itemName, amount = string.match(msg, format_getItemString)
 
-      if (not preMessage) or (preMessage == "") and format_getCraftedItemString then
+      if (not preMessage or preMessage == "") and format_getCraftedItemString then
         linkColor, itemString, itemName, preMessage = string.match(msg, format_getCraftedItemString)
       end
 
