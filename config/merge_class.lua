@@ -41,8 +41,9 @@ do
 	spell '55078'   '3.0'	--  Blood Plague
 	spell '52212'   '3.0'	--  Death and Decay
 	spell '50536'   '3.0'	--  Unholy Blight
-end
 
+	spec '1455'
+end
 
 class 'DRUID'
 do
@@ -69,8 +70,9 @@ do
 	spell '740'    '3.0'	--  Tranquility
 	spell '33763'  '3.0'	--  Lifebloom (Cata)
 	spell '48438'  '3.0'	--  Wild Growth (Cata)
-end
 
+	spec '1447'
+end
 
 class 'HUNTER'
 do
@@ -89,8 +91,9 @@ do
 	spell '24131'  '3.0'	--  Wyvern Sting
 	spell '3674'   '3.0'	--  Black Arrow
 	spell '53301'  '2.5'	--  Explosive Shot (Cata)
-end
 
+	spec '1448'
+end
 
 class 'MAGE'
 do
@@ -116,6 +119,40 @@ do
 	spell '120'    '0.1'	--  Cone of Cold
 	spell '122'    '0.1'	--  Frost Nova
 	spell '42208'  '0.1'	--  Blizzard
+
+	spec '1449'
+end
+
+class 'MONK'
+do
+	spec  '269' -- Windwalker
+	spell '128531'  '4'     -- Blackout Kick (DoT)
+	spell '115181'  '0.5'   -- Breath of Fire
+	spell '148135'  '3'     -- Chi Burst (Damage)
+	spell '132467'  '6'     -- Chi Wave (Damage)
+	spell '113656'  '4'     -- Fists of Fury
+	spell '121253'  '0.5'   -- Keg Smash
+	spell '148187'  '2.5'   -- Rushing Jade Wind (Damage)
+	spell '107270'  '2.5'   -- Spinning Crane Kick
+	spell '124255'  '6'     -- Stagger/Staffelung
+	spell '124098'  '6'     -- Zen Sphere (Damage)
+
+	spec  '270'  -- Mistweaver
+	spell '128591'  '3'     -- Blackout Kick (Heal??)
+	spell '130654'  '3'     -- Chi Burst
+	spell '124040'  '5'     -- Chi Torpedo
+	spell '132463'  '6'     -- Chi Wave (Heal)
+	spell '117895'  '3'     -- Eminence
+	spell '132120'  '6'     -- Enveloping Mist
+	spell '119611'  '6'     -- Renewing Mist
+	spell '115310'  '0.5'   -- Revival
+	spell '127722'  '3'     -- Serpent's Zeal
+	spell '115175'  '4.5'   -- Soothing Mist
+	spell '117640'  '2.5'   -- Spinning Crane Kick (Heal)
+	spell '116670'  '0.5'   -- Uplift
+	spell '124081'  '6'     -- Zen Sphere (Heal)
+
+	spec '1450'
 end
 
 
@@ -141,8 +178,9 @@ do
 	spell '53385'  '0.1'	--  Divine Storm
 	spell '96172'  '3.0'	--  Hand of Light (Cata)
 	spell '101423' '3.0'	--  Seal of Righteousness (Cata)
-end
 
+	spec '1451'
+end
 
 class 'PRIEST'
 do
@@ -169,8 +207,9 @@ do
 	spell '15407'  '3.0'	--  Mind Flay
 	spell '34914'  '3.0'	--  Vampiric Touch
 	spell '49821'  '3.0'	--  Mind Sear
-end
 
+	spec '1452'
+end
 
 class 'ROGUE'
 do
@@ -191,8 +230,8 @@ do
 
 	spec  '261' -- Sublety
 
+	spec '1453'
 end
-
 
 class 'SHAMAN'
 do
@@ -218,8 +257,9 @@ do
 	spell '51945'  '3.0'    --  Earthliving
 	spell '61295'  '3.0'    --  Riptide
 	spell '73920'  '3.0'    --  Healing Rain (Cata)
-end
 
+	spec '1444'
+end
 
 class 'WARLOCK'
 do
@@ -251,8 +291,9 @@ do
 	spell '47960'  '3.0'	--  Shadowflame
 	spell '85421'  '3.0'	--  Burning Embers (Cata)
 	spell '85455'  '3.0'	--  Bane of Havoc (Cata)
-end
 
+	spec '1454'
+end
 
 class 'WARRIOR'
 do
@@ -281,4 +322,6 @@ do
 	spec  '73' -- Protection
 	spell '6572'   '0.1'	--  Revenge
 	spell '46968'  '0.1'	--  Shockwave
+
+	spec '1446'
 end

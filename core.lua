@@ -120,6 +120,16 @@ function x:OnInitialize()
   self.db.RegisterCallback(self, 'OnProfileCopied', RefreshConfig)
   self.db.RegisterCallback(self, 'OnProfileReset', ProfileReset)
 
+  -- Add dual-spec support
+  local LibDualSpec = LibStub('LibDualSpec-1.0')
+  LibDualSpec:EnhanceDatabase(self.db, "xCT")
+  LibDualSpec:EnhanceOptions(addon.options.args['Profiles'], self.db)
+
+  -- Had to pass the explicit method into here, not sure why
+  self.db.RegisterCallback(self, 'OnProfileChanged', RefreshConfig)
+  self.db.RegisterCallback(self, 'OnProfileCopied', RefreshConfig)
+  self.db.RegisterCallback(self, 'OnProfileReset', RefreshConfig)
+
   -- Clean up the Profile
   local success = x:CompatibilityLogic(self.existingProfile)
   if not success then
@@ -273,7 +283,7 @@ end
 -- This function was created as the central location for crappy code
 function x:CompatibilityLogic( existing )
     local addonVersionString = GetAddOnMetadata("xCT+", "Version")
-    if addonVersionString and string_find(addonVersionString, "project%-version") then addonVersionString = "4.7.1" end
+    if addonVersionString and string_find(addonVersionString, "project%-version") then addonVersionString = "4.7.5" end
     local currentVersion = VersionToTable(addonVersionString)
     local previousVersion = VersionToTable(self.db.profile.dbVersion or "4.3.0 Beta 2")
 
@@ -388,7 +398,8 @@ do
     if Descriptions[spellID] then
       return Descriptions[spellID]
     end
-
+		
+    tooltip:ClearLines()
     tooltip:SetSpellByID(spellID)
 
     description = ""
@@ -423,46 +434,60 @@ local CLASS_NAMES = {
     [250] = 1,   -- Blood
     [251] = 2,   -- Frost
     [252] = 3,   -- Unholy
+    [1455] = 4,  -- Unified
   },
   ["DRUID"] = {
     [102] = 1,   -- Balance
     [103] = 2,   -- Feral
     [105] = 3,   -- Restoration
+    [1447] = 4,  -- Unified
   },
   ["HUNTER"] = {
     [253] = 1,   -- Beast Mastery
     [254] = 2,   -- Marksmanship
     [255] = 3,   -- Survival
+    [1448] = 4,  -- Unified
   },
   ["MAGE"] = {
     [62] = 1,    -- Arcane
     [63] = 2,    -- Fire
     [64] = 3,    -- Frost
   },
+  ['MONK'] = {
+    [268] = 1,   -- Brewmaster
+    [270] = 2,   -- Mistweaver
+    [269] = 3,   -- Windwalker
+    [1450] = 4,  -- Unified
+  },
   ["PALADIN"] = {
     [65] = 1,    -- Holy
     [66] = 2,    -- Protection
     [70] = 3,    -- Retribution
+    [1451] = 4,  -- Unified
   },
   ["PRIEST"] = {
     [256] = 1,   -- Discipline
     [257] = 2,   -- Holy
     [258] = 3,   -- Shadow
+    [1452] = 4,  -- Unified
   },
   ["ROGUE"] = {
     [259] = 1,   -- Assassination
     [260] = 2,   -- Combat
     [261] = 3,   -- Subtlety
+    [1453] = 4,  -- Unified
   },
   ["SHAMAN"] = {
     [262] = 1,   -- Elemental
     [263] = 2,   -- Enhancement
     [264] = 3,   -- Restoration
+    [1444] = 4,  -- Unified
   },
   ["WARLOCK"] = {
     [265] = 1,   -- Affliction
     [266] = 2,   -- Demonology
     [267] = 3,   -- Destruction
+    [1454] = 4,  -- Unified
   },
   ["WARRIOR"] = {
     [71] = 1,    -- Arms
@@ -475,33 +500,59 @@ x.specName = {
    	[62] = L["Arcane"],
    	[63] = L["Fire"],
    	[64] = L["Frost"],
+    [1449] = L["Mage"],
    	[65] = L["Holy"],
    	[66] = L["Protection"],
    	[70] = L["Retribution"],
+    [1451] = L["Paladin"],
    	[71] = L["Arms"],
    	[72] = L["Fury"],
    	[73] = L["Protection"],
+    [1446] = L["Warrior"],
    	[102] = L["Balance"],
    	[103] = L["Feral"],
    	[105] = L["Restoration"],
+    [1447] = L["Druid"],
     [250] = L["Blood"],
     [251] = L["Frost"],
     [252] = L["Unholy"],
+    [1455] = L["Death Knight"],
    	[253] = L["Beast Mastery"],
    	[254] = L["Marksmanship"],
    	[255] = L["Survival"],
+    [1448] = L["Hunter"],
    	[256] = L["Discipline"],
    	[257] = L["Holy"],
    	[258] = L["Shadow"],
+    [1452] = L["Priest"],
    	[259] = L["Assassination"],
    	[260] = L["Combat"],
    	[261] = L["Subtlety"],
+    [1453] = L["Rogue"],
    	[262] = L["Elemental"],
    	[263] = L["Enhancement"],
    	[264] = L["Restoration"],
+    [1444] = L["Shaman"],
    	[265] = L["Affliction"],
    	[266] = L["Demonology"],
    	[267] = L["Destruction"],
+    [1454] = L["Warlock"],
+    [268] = L["Brewmaster"],
+    [270] = L["Mistweaver"],
+    [269] = L["Windwalker"],
+    [1450] = L["Monk"],
+
+    [1444] = L["Unified"],
+    [1446] = L["Unified"],
+    [1447] = L["Unified"],
+    [1448] = L["Unified"],
+    [1449] = L["Unified"],
+    [1450] = L["Unified"],
+    [1451] = L["Unified"],
+    [1452] = L["Unified"],
+    [1453] = L["Unified"],
+    [1454] = L["Unified"],
+    [1455] = L["Unified"],
 }
 
 function x.GenerateDefaultSpamSpells()

@@ -20,11 +20,15 @@ local x = addon.engine
 addon.DEFAULT_PET_ICON = 'ability_seal'
 
 addon.PET_ICONS = {
-
 	-- Hunter Pets (from WoWHead)
 	[1044490] = 'inv_hippo_green',                       -- Riverbeast
 	[1044501] = 'inv_talbukdraenor_white',               -- Stag
 	[1044794] = 'inv_clefthoofdraenormount_blue',        -- Clefthoof
+	[1624590] = 'inv_pterrordax2mount_yellow',           -- Pterrordax
+	[1687702] = 'inv_bloodtrollbeast_mount',             -- Blood Beast
+	[2011146] = 'achievement_dungeon_thesandqueen',      -- Carapid
+	[2027936] = 'inv_komododragon_green',                -- Lizard
+	[2143073] = 'inv_horse3_pale',                       -- Courser
 	[132182]  = 'ability_hunter_pet_bat',                -- Bat
 	[132183]  = 'ability_hunter_pet_bear',               -- Bear
 	[132184]  = 'ability_hunter_pet_boar',               -- Boar
@@ -51,11 +55,6 @@ addon.PET_ICONS = {
 	[132254]  = 'ability_mount_ridingelekk',             -- Mammoth
 	[133570]  = 'inv_misc_ahnqirajtrinket_01',           -- Beetle
 	[136040]  = 'spell_nature_guardianward',             -- Serpent
-	[1624590] = 'inv_pterrordax2mount_yellow',           -- Pterrordax
-	[1687702] = 'inv_bloodtrollbeast_mount',             -- Blood Beast
-	[2011146] = 'achievement_dungeon_thesandqueen',      -- Carapid
-	[2027936] = 'inv_komododragon_green',                -- Lizard
-	[2143073] = 'inv_horse3_pale',                       -- Courser
 	[236165]  = 'ability_druid_primalprecision',         -- Spirit Beast
 	[236190]  = 'ability_hunter_pet_chimera',            -- Chimaera
 	[236191]  = 'ability_hunter_pet_corehound',          -- Core Hound
