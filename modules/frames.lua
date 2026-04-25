@@ -36,6 +36,18 @@ local GetItemInfo = function(...)
 		return C_Item.GetItemInfo(...)
 	end
 end
+local GetSpellInfo = function(...)
+  if C_Spell and C_Spell.GetSpellInfo then
+    local spellInfo = C_Spell.GetSpellInfo(...)
+    -- name, subtext, icon, castTime, minRange, maxRange, spellID, originalIcon
+    if spellInfo then
+      return spellInfo.name, nil, spellInfo.iconID, spellInfo.castTime, spellInfo.minRange, spellInfo.maxRange, spellInfo.spellID, spellInfo.originalIconID
+    end
+  elseif _G.GetSpellInfo then
+    return _G.GetSpellInfo(...)
+  end
+end
+local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS
 -- Start the Random Machine!
 random(time()); random(); random(time())
 
@@ -1073,10 +1085,10 @@ end
 
 -- Gets a random spell icon that is NOT an engineering cog wheel
 local function GetRandomSpellID()
-	local icon, spellID
+	local icon, spellID, _
 	repeat
 		spellID = random(100, 80000)
-		icon = select(3, GetSpellInfo(spellID))
+		_,_,icon = GetSpellInfo(spellID)
 	until icon and icon ~= 136243
 	return spellID
 end

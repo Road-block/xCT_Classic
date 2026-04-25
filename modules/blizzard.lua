@@ -22,16 +22,37 @@
 local ADDON_NAME, addon = ...
 local x = addon.engine
 local L = addon.L
-local LSM = LibStub("LibSharedMedia-3.0");
+local LSM = LibStub("LibSharedMedia-3.0")
 
--- Intercept Messages Sent by other Add-Ons that use CombatText_AddMessage
-hooksecurefunc('CombatText_AddMessage', function(message, scrollFunction, r, g, b, displayType, isStaggered)
+local function replaceCombatTextLastEntry(message, scrollFunction, r, g, b, displayType, isStaggered)
   if not x.db.profile.blizzardFCT.enableFloatingCombatText then
-    local lastEntry = COMBAT_TEXT_TO_ANIMATE[ #COMBAT_TEXT_TO_ANIMATE ]
-    CombatText_RemoveMessage(lastEntry)
+    local lastEntry
+    if COMBAT_TEXT_TO_ANIMATE and CombatText_RemoveMessage then
+      local lastEntry = COMBAT_TEXT_TO_ANIMATE[ #COMBAT_TEXT_TO_ANIMATE ]
+      if lastEntry then
+        CombatText_RemoveMessage(lastEntry)
+      end
+    elseif CombatText.activeFontStrings then
+      local lastEntryIndex = #CombatText.activeFontStrings
+      if lastEntryIndex > 0 then
+        local lastEntry = CombatText.activeFontStrings[lastEntryIndex]
+        lastEntry:SetAlpha(0)
+        lastEntry:Hide()
+        lastEntry:SetPoint("TOP", WorldFrame, "BOTTOM", CombatText.textLocations.startX, CombatText.textLocations.startY)
+        CombatText.fontStringPool:Release(lastEntry)
+        table.remove(CombatText.activeFontStrings, lastEntryIndex)
+      end
+    end
     x:AddMessage("general", message, {r, g, b})
   end
-end)
+end
+
+if _G.CombatText_AddMessage and _G.CombatText_RemoveMessage then
+  -- Intercept Messages Sent by other Add-Ons that use CombatText_AddMessage
+  hooksecurefunc('CombatText_AddMessage', replaceCombatTextLastEntry)
+elseif CombatText and CombatText.AddMessage then
+  hooksecurefunc(CombatText, 'AddMessage', replaceCombatTextLastEntry)
+end
 
 local fsTitle, configButton
 x.UpdateBlizzardOptions = function() --[[ Nothing to see here, for now... ]] end

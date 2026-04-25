@@ -20,6 +20,7 @@ local x = addon.engine
 -- up values
 local _, _G, sformat, mfloor, mabs, ssub, smatch, sgsub, s_upper, s_lower, string, tinsert, tremove, ipairs, pairs, print, tostring, tonumber, select, unpack =
   nil, _G, string.format, math.floor, math.abs, string.sub, string.match, string.gsub, string.upper, string.lower, string, table.insert, table.remove, ipairs, pairs, print, tostring, tonumber, select, unpack
+local falsey = function() return false end
 local GetItemInfo = function(...)
   if _G.GetItemInfo then
     return _G.GetItemInfo(...)
@@ -48,6 +49,30 @@ local GetItemCount = function(...)
     return C_Item.GetItemCount(...)
   end
 end
+local UnitBuff, UnitAura = falsey, falsey
+if C_UnitAuras and C_UnitAuras.GetBuffDataByIndex and AuraUtil and AuraUtil.UnpackAuraData then
+  UnitBuff = function(...)
+    local unit,index,filter = ...
+    return AuraUtil.UnpackAuraData(C_UnitAuras.GetBuffDataByIndex(unit,index))
+  end
+  UnitAura = function(...)
+    local unit,index,filter = ...
+    return AuraUtil.UnpackAuraData(C_UnitAuras.GetAuraDataByIndex(unit,index,filter))
+  end
+elseif _G.UnitBuff and _G.UnitAura then
+  UnitBuff = function(...)
+    local unit,index,filter = ...
+    if not filter then
+      filter = "HELPFUL"
+    end
+    return _G.UnitBuff(unit,index,filter)
+  end
+  UnitAura = _G.UnitAura
+end
+local GetSpellInfo = C_Spell and C_Spell.GetSpellName or _G.GetSpellInfo
+local GetSpellTexture = C_Spell and C_Spell.GetSpellTexture or _G.GetSpellTexture
+
+local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS
 
 --UTF8 Functions
 local utf8 = {
@@ -64,6 +89,9 @@ if not xCP then print("Something went wrong when xCT+ tried to load. Please rein
 local L_AUTOATTACK = GetSpellInfo(6603)
 local L_KILLCOMMAND =  GetSpellInfo(34026)
 local KILLCOMMAND_ID = 83381
+local COMBAT_TEXT_LOW_HEALTH_THRESHOLD = CombatTextConstants and CombatTextConstants.LowHealthThreshold or _G.COMBAT_TEXT_LOW_HEALTH_THRESHOLD
+local COMBAT_TEXT_LOW_MANA_THRESHOLD = CombatTextConstants and CombatTextConstants.LowManaThreshold or _G.COMBAT_TEXT_LOW_MANA_THRESHOLD
+
 
 local replacedTextures = {
 	[136998] = "Interface\\PVPFrame\\PVP-Currency-Alliance",
@@ -162,7 +190,7 @@ function x:UpdatePlayer()
 
   -- Set Player's Information
   x.player.name   = UnitName("player")
-  x.player.class  = select(2, UnitClass("player"))
+  _, x.player.class  = UnitClass("player")
   x.player.guid   = UnitGUID("player")
 
   -- local activeTalentGroup = GetActiveSpecGroup(false, false)
@@ -648,7 +676,7 @@ function x:GetSpellTextureFormatted( spellID, message, iconSize, showInvisibleIc
   elseif type(spellID) == 'string' then
     icon = spellID
   else
-    icon = GetSpellTexture( addon.merge2h[spellID] or spellID ) or x.BLANK_ICON
+    icon = spellID and GetSpellTexture( addon.merge2h[spellID] or spellID ) or x.BLANK_ICON
   end
 
   if iconSize < 1 then
@@ -856,7 +884,7 @@ x.combat_events = {
       local message = spellName
 
       -- Add Stacks
-      local icon, spellStacks = select(2, x.GetUnitAura("player", spellName))
+      local _, icon, spellStacks = x.GetUnitAura("player", spellName)
       if spellStacks and tonumber(spellStacks) > 1 then
         message = spellName .. " |cffFFFFFFx" .. spellStacks .. "|r"
       end
@@ -914,8 +942,8 @@ x.events = {
   ["UNIT_POWER_UPDATE"] = function(unit, powerType)
       -- Update for Class Combo Points
       UpdateUnitPower(unit, powerType)
-
-      if select(2, UnitPowerType(x.player.unit)) == "MANA" and ShowLowResources() and UnitPower(x.player.unit) / UnitPowerMax(x.player.unit) <= COMBAT_TEXT_LOW_MANA_THRESHOLD then
+      local _, powertoken = UnitPowerType(x.player.unit)
+      if powertoken == "MANA" and ShowLowResources() and UnitPower(x.player.unit) / UnitPowerMax(x.player.unit) <= COMBAT_TEXT_LOW_MANA_THRESHOLD then
         if not x.lowMana then
           x:AddMessage('general', MANA_LOW, 'lowResourcesMana')
           x.lowMana = true
@@ -1018,7 +1046,7 @@ x.events = {
         local crafted, looted, pushed = (preMessage == format_crafted), (preMessage == format_looted), (preMessage == format_pushed)
 
         -- Item Quality, See "GetAuctionItemClasses()" For Type and Subtype, Item Icon Texture Location
-        local itemQuality, _, _, itemType, itemSubtype, _, _, itemTexture = select(3, GetItemInfo(linkID))
+        local _, _, itemQuality, _, _, itemType, itemSubtype, _, _, itemTexture = GetItemInfo(linkID)
 
         -- Item White-List Filter
         local listed = x.db.profile.spells.items[itemType] and (x.db.profile.spells.items[itemType][itemSubtype] == true)
@@ -1370,9 +1398,12 @@ end
 -- =====================================================
 local CombatEventHandlers = {
 	["ShieldOutgoing"] = function (args)
-		local buffIndex = x.findBuffIndex(args.destName, args.spellName)
+		local buffIndex,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,value = x.findBuffIndex(args.isPlayer and "player" or "pet", args.spellName)
 		if not buffIndex then return end
-		local settings, value = x.db.profile.frames['outgoing'], select(16, UnitBuff(args.destName, buffIndex))
+		local settings = x.db.profile.frames['outgoing']
+    if not value then
+      _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,value = UnitBuff(args.destName, buffIndex)
+    end
 		if not value or value <= 0 then return end
 
 		-- Keep track of spells that go by
@@ -1693,9 +1724,12 @@ local CombatEventHandlers = {
 	end,
 
 	["ShieldIncoming"] = function (args)
-		local buffIndex = x.findBuffIndex("player", args.spellName)
+		local buffIndex,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,value = x.findBuffIndex("player", args.spellName)
 		if not buffIndex then return end
-		local settings, value = x.db.profile.frames['healing'], select(16, UnitBuff("player", buffIndex))
+		local settings = x.db.profile.frames['healing']
+    if not value then
+      _,_,_,_,_,_,_,_,_,_,_,_,_,_,_,value = UnitBuff("player", buffIndex)
+    end
 		if not value or value <= 0 then return end
 
 		if TrackSpells() then x.spellCache.healing[args.spellId] = true end
@@ -1808,7 +1842,7 @@ local CombatEventHandlers = {
 
 		local color = 'killingBlow'
 		if args.destGUID then
-			local class = select(2, GetPlayerInfoByGUID(args.destGUID))
+			local _, class = GetPlayerInfoByGUID(args.destGUID)
 			if RAID_CLASS_COLORS[class] then
 				color = RAID_CLASS_COLORS[class]
 			end
@@ -2125,15 +2159,17 @@ function x.CombatLogEvent (args)
 end
 
 function x.findBuffIndex(unitName, spellName)
-	for i = 1, 40 do
-
-		-- TODO: Keep if we want to change this to find SpellID index
-		-- buffName, _, _, _, _, _, _, _, _ , spellId = UnitBuff(unitName, i)
-
-		if UnitBuff(unitName, i) == spellName then
-			return i
-		end
-	end
+  if C_UnitAuras and C_UnitAuras.GetAuraDataBySpellName and AuraUtil and AuraUtil.UnpackAuraData then
+    return 0, AuraUtil.FindAuraByName(spellName, unitName, "HELPFUL")
+  else
+  	for i = 1, 40 do
+  		-- TODO: Keep if we want to change this to find SpellID index
+  		-- buffName, _, _, _, _, _, _, _, _ , spellId = UnitBuff(unitName, i)
+  		if UnitBuff(unitName, i) == spellName then
+  			return i
+  		end
+  	end
+  end
 	return false
 end
 
@@ -2141,11 +2177,21 @@ function x.GetUnitAura(unit, spell, filter)
 	if filter and not filter:upper():find("FUL") then
 		filter = filter.."|HELPFUL"
 	end
-	for i = 1, 40 do
-		local name, _, _, _, _, _, _, _, _, spellId = UnitAura(unit, i, filter)
-		if not name then return end
-		if spell == spellId or spell == name then
-			return UnitAura(unit, i, filter)
-		end
-	end
+  if AuraUtil and AuraUtil.ForEachAura then
+    -- icon,applications,dispelName,duration,expirationTime,sourceUnit,isStealable,nameplateShowPersonal,spellId,canApplyAura,isBossAura,isFromPlayerOrPlayerPet,nameplateShowAll,timeMod, ...
+    AuraUtil.ForEachAura(unit,filter,nil,function(name, icon, applications, dispelName, duration, expirationTime, sourceUnit, isStealable, nameplateShowPersonal, spellId,...)
+      if not name then return end
+      if spell == spellId or spell == name then
+        return name, icon, applications, dispelName, duration, expirationTime, sourceUnit, isStealable, nameplateShowPersonal, spellId, ...
+      end
+    end)
+  else
+  	for i = 1, 40 do
+  		local name, _, _, _, _, _, _, _, _, spellId = UnitAura(unit, i, filter)
+  		if not name then return end
+  		if spell == spellId or spell == name then
+  			return UnitAura(unit, i, filter)
+  		end
+  	end
+  end
 end

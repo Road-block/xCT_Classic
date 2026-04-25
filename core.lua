@@ -29,6 +29,7 @@ local GetItemInfo = function(...)
     return C_Item.GetItemInfo(...)
   end
 end
+local GetSpellInfo = C_Spell and C_Spell.GetSpellName or _G.GetSpellInfo
 
 -- compares a tables values
 local function tableCompare(t1, t2)

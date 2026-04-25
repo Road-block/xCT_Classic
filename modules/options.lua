@@ -28,7 +28,18 @@ local GetItemInfo = function(...)
     return C_Item.GetItemInfo(...)
   end
 end
-
+local GetSpellInfo = function(...)
+  if C_Spell and C_Spell.GetSpellInfo then
+    local spellInfo = C_Spell.GetSpellInfo(...)
+    -- name, subtext, icon, castTime, minRange, maxRange, spellID, originalIcon
+    if spellInfo then
+      return spellInfo.name, nil, spellInfo.iconID, spellInfo.castTime, spellInfo.minRange, spellInfo.maxRange, spellInfo.spellID, spellInfo.originalIconID
+    end
+  elseif _G.GetSpellInfo then
+    return _G.GetSpellInfo(...)
+  end
+end
+local RAID_CLASS_COLORS = CUSTOM_CLASS_COLORS or _G.RAID_CLASS_COLORS
 -- New Icon "!"
 local NEW = x.new
 

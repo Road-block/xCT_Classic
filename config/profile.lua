@@ -46,7 +46,7 @@ end
 
 -- Upvalue
 local tostring = tostring
-
+local GetSpellInfo = C_Spell and C_Spell.GetSpellName or _G.GetSpellInfo
 
 -- Add Merge Spell to the DB before it gets used by the profile
 addon.mergesNameToID = {}

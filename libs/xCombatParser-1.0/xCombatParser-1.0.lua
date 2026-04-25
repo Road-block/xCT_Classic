@@ -164,6 +164,7 @@ end
 do
 	-- Upvalues (Only values that will be used more than once)
 	local select,sub,tostring,playerGUID=select,string.sub,tostring
+	local GetSpellInfo = C_Spell and C_Spell.GetSpellName or _G.GetSpellInfo
 
 	-- Recycle or create out event frame
 	private.frame=oldLib and oldLib.private.frame or CreateFrame"frame"
