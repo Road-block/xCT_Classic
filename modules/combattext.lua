@@ -152,10 +152,13 @@ x.POWER_LOOKUP = {
 	[17] = "FURY",
 	[18] = "PAIN",
   [19] = "ESSENCE",
-  [20] = "RUNES", -- "RUNETYPE_BLOOD",
-  [21] = "RUNES", -- "RUNETYPE_FROST",
-  [22] = "RUNES", -- "RUNETYPE_UNHOLY",
+  [20] = "RUNES", -- "RUNE_COST_BLOOD",
+  [21] = "RUNES", -- "RUNE_COST_FROST",
+  [22] = "RUNES", -- "RUNE_COST_UNHOLY",
   [26] = "ECLIPSE",
+  [27] = "HAPPINESS",
+  [28] = "SHADOW_ORBS",
+  [29] = "RUNES", -- "RUNE_COST_CHROMATIC"
 }
 
 

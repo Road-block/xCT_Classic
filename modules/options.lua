@@ -6364,6 +6364,14 @@ addon.options.args["Frames"] = {
               set = set2,
               width = "normal",
             },
+            disableResource_SHADOW_ORBS = {
+              order = 117,
+              type = 'toggle',
+              name = L["Disable |cff798BDD"]..SHADOW_ORBS,
+              get = get2,
+              set = set2,
+              width = "normal",
+            },
 
           },
         },

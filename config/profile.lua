@@ -881,6 +881,7 @@ addon.defaults = {
           ['color_ARCANE_CHARGES_POWER'] = { enabled = false, desc = ARCANE_CHARGES_POWER, default = { 0.10, 0.10, 0.98 } },
           ['color_ECLIPSE_positive']     = { enabled = false, desc = BALANCE_POSITIVE_ENERGY,default = { 0.61, 0.57, 0.17 } },
           ['color_ECLIPSE_negative']     = { enabled = false, desc = BALANCE_NEGATIVE_ENERGY,default = { 0.17, 0.61, 0.57 } },
+          ['color_SHADOW_ORBS']          = { enabled = false, desc = SHADOW_ORBS,          default = { 0.50, 0.32, 0.55 } },
         },
 
         -- scrollable
@@ -921,6 +922,7 @@ addon.defaults = {
         ["disableResource_PAIN"]             = false,
         ["disableResource_ECLIPSE_positive"] = false,
         ["disableResource_ECLIPSE_negative"] = false,
+        ["disableResource_SHADOW_ORBS"]      = false,
       },
 
       procs = {
