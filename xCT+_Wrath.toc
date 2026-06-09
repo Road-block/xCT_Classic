@@ -3,7 +3,7 @@
 ## Notes: An Add-On that can out-perform or enhance the default Floating Combat Text!
 ## Author: Dandruff-Stormreaver US
 ## X-ClassicAuthor: Roadblock
-## Version: 4.7.7
+## Version: 4.7.8
 ## Category: Combat
 ## RequiredDeps: Blizzard_CombatText
 ## OptionalDeps: xCT, ElvUI

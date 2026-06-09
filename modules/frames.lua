@@ -443,6 +443,7 @@ end
 --		Sends a message to the framename specified.
 -- =====================================================
 function x:AddMessage(framename, message, colorname)
+	if not type(message)=="string" then return end
 	local frame = x:GetFrame(framename, true)
 	local frameOptions = x.db.profile.frames[framename]
 

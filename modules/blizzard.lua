@@ -35,12 +35,14 @@ local function replaceCombatTextLastEntry(message, scrollFunction, r, g, b, disp
     elseif CombatText.activeFontStrings then
       local lastEntryIndex = #CombatText.activeFontStrings
       if lastEntryIndex > 0 then
-        local lastEntry = CombatText.activeFontStrings[lastEntryIndex]
-        lastEntry:SetAlpha(0)
-        lastEntry:Hide()
-        lastEntry:SetPoint("TOP", WorldFrame, "BOTTOM", CombatText.textLocations.startX, CombatText.textLocations.startY)
-        CombatText.fontStringPool:Release(lastEntry)
-        table.remove(CombatText.activeFontStrings, lastEntryIndex)
+        lastEntry = CombatText.activeFontStrings[lastEntryIndex]
+        if lastEntry then
+          lastEntry:SetAlpha(0)
+          lastEntry:Hide()
+          lastEntry:SetPoint("TOP", WorldFrame, "BOTTOM", CombatText.textLocations.startX, CombatText.textLocations.startY)
+          CombatText.fontStringPool:Release(lastEntry)
+          table.remove(CombatText.activeFontStrings, lastEntryIndex)
+        end
       end
     end
     x:AddMessage("general", message, {r, g, b})
@@ -51,7 +53,7 @@ if _G.CombatText_AddMessage and _G.CombatText_RemoveMessage then
   -- Intercept Messages Sent by other Add-Ons that use CombatText_AddMessage
   hooksecurefunc('CombatText_AddMessage', replaceCombatTextLastEntry)
 elseif CombatText and CombatText.AddMessage then
-  hooksecurefunc(CombatText, 'AddMessage', replaceCombatTextLastEntry)
+  hooksecurefunc(CombatText, 'AddMessage', function(_,...) replaceCombatTextLastEntry(...) end)
 end
 
 local fsTitle, configButton
